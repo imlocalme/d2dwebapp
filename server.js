@@ -122,7 +122,6 @@ server.on('upgrade', (req, socket) => {
     socket.destroy();
     return;
   }
-  console.log('WebSocket upgrade request received.', req.url);
   const key = req.headers['sec-websocket-key'];
   if (!key) {
     socket.destroy();

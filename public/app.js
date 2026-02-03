@@ -3,7 +3,6 @@ const state = {
   roomId: null,
   clientId: null,
   peers: new Map(),
-  peerMeta: new Map(),
   localStream: null,
   dataChannels: new Map(),
   pendingFiles: new Map(),
@@ -37,8 +36,7 @@ const setStatus = (message) => {
 };
 
 const connectWebSocket = () => {
-  const protocol = location.protocol === 'https:' ? 'wss' : 'ws';
-  state.ws = new WebSocket(`${protocol}://${location.host}`);
+  state.ws = new WebSocket(`ws://${location.host}`);
 
   state.ws.addEventListener('open', () => {
     setStatus('Connected to signaling server.');
@@ -90,7 +88,6 @@ const createPeerConnection = async (peerId, isInitiator) => {
     iceServers: [{ urls: 'stun:stun.l.google.com:19302' }]
   });
   state.peers.set(peerId, pc);
-  state.peerMeta.set(peerId, { isInitiator, makingOffer: false });
 
   if (state.localStream) {
     for (const track of state.localStream.getTracks()) {
@@ -110,19 +107,6 @@ const createPeerConnection = async (peerId, isInitiator) => {
 
   pc.addEventListener('datachannel', (event) => {
     setupDataChannel(peerId, event.channel);
-  });
-
-  pc.addEventListener('negotiationneeded', async () => {
-    const meta = state.peerMeta.get(peerId);
-    if (!meta?.isInitiator || meta.makingOffer) return;
-    try {
-      meta.makingOffer = true;
-      const offer = await pc.createOffer();
-      await pc.setLocalDescription(offer);
-      sendSignal(peerId, { type: 'offer', sdp: pc.localDescription });
-    } finally {
-      meta.makingOffer = false;
-    }
   });
 
   if (isInitiator) {
@@ -208,7 +192,6 @@ const removePeer = (peerId) => {
   const pc = state.peers.get(peerId);
   if (pc) pc.close();
   state.peers.delete(peerId);
-  state.peerMeta.delete(peerId);
   state.dataChannels.delete(peerId);
   const remoteVideo = qs(`#remote-${peerId}`);
   if (remoteVideo) remoteVideo.remove();
@@ -251,25 +234,8 @@ const startLocalMedia = async () => {
       pc.addTrack(track, state.localStream);
     }
   }
-  await renegotiatePeers();
   await enumerateDevices();
   setStatus('Local media started.');
-};
-
-const renegotiatePeers = async () => {
-  const tasks = [];
-  for (const [peerId, pc] of state.peers.entries()) {
-    const meta = state.peerMeta.get(peerId);
-    if (!meta?.isInitiator || pc.signalingState !== 'stable') continue;
-    tasks.push(
-      (async () => {
-        const offer = await pc.createOffer();
-        await pc.setLocalDescription(offer);
-        sendSignal(peerId, { type: 'offer', sdp: pc.localDescription });
-      })()
-    );
-  }
-  await Promise.all(tasks);
 };
 
 const stopLocalMedia = () => {

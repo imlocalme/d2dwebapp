@@ -1,0 +1,11 @@
+{
+  "name": "d2d-webapp",
+  "version": "0.1.0",
+  "description": "Device-to-device sharing for files, text, video, and audio.",
+  "main": "server.js",
+  "type": "module",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node server.js"
+  }
+}

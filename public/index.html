@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>D2D Fast Share</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <header>
+      <h1>D2D Fast Share</h1>
+      <p>Instant device-to-device sharing for files, text, and live video/audio.</p>
+    </header>
+
+    <main>
+      <section class="panel">
+        <h2>Connect</h2>
+        <div class="row">
+          <input id="room" type="text" placeholder="Room name" />
+          <button id="join">Join room</button>
+        </div>
+        <div id="status" class="status">Disconnected</div>
+        <p class="note">Tip: open this page on another device using the same room name.</p>
+      </section>
+
+      <section class="panel">
+        <h2>Live Audio & Video</h2>
+        <div class="row">
+          <label for="audio-input">Microphone</label>
+          <select id="audio-input"></select>
+          <button id="start-media">Start media</button>
+          <button id="stop-media">Stop media</button>
+        </div>
+        <div class="video-grid">
+          <div class="video-card">
+            <h3>You</h3>
+            <video id="local-video" autoplay muted playsinline class="video-tile"></video>
+          </div>
+          <div class="video-card">
+            <h3>Peers</h3>
+            <div id="remote-grid" class="remote-grid"></div>
+          </div>
+        </div>
+      </section>
+
+      <section class="panel">
+        <h2>Send Text</h2>
+        <div class="row">
+          <input id="text-input" type="text" placeholder="Type a message" />
+          <button id="send-text">Send</button>
+        </div>
+      </section>
+
+      <section class="panel">
+        <h2>Send Files</h2>
+        <div class="row">
+          <input id="file-input" type="file" />
+        </div>
+        <p class="note">Large files are chunked for fast device-to-device transfer.</p>
+      </section>
+
+      <section class="panel log-panel">
+        <h2>Activity</h2>
+        <div id="log" class="log"></div>
+      </section>
+    </main>
+
+    <footer>
+      <p>Runs locally on your network with WebRTC. For best speed, keep devices on the same Wi‑Fi.</p>
+    </footer>
+
+    <script src="app.js" type="module"></script>
+  </body>
+</html>
